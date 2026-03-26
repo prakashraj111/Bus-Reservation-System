@@ -1,0 +1,354 @@
+.bus-service-page {
+  width: min(1100px, 94%);
+  margin: 34px auto 48px;
+}
+
+.bus-search-card {
+  background: #f8f8fc;
+  border: 1px solid #d8cdef;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(101, 78, 197, 0.14);
+  padding: 18px;
+  display: block;
+}
+
+.bus-search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(180px, 0.95fr) 180px;
+  gap: 14px;
+  align-items: center;
+}
+
+.bus-search-field {
+  position: relative;
+}
+
+.bus-search-card input {
+  height: 50px;
+  border: 1px solid #b39ac9;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-size: 15px;
+  color: #333;
+  outline: none;
+  background: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bus-search-field input {
+  width: 100%;
+}
+
+.bus-search-card input::placeholder {
+  color: #8b8b98;
+}
+
+.bus-search-card input:focus {
+  border-color: #6f4cd5;
+  box-shadow: 0 0 0 4px rgba(111, 76, 213, 0.14);
+}
+
+.bus-search-row > button {
+  height: 50px;
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  background: #6f4cd5;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.bus-search-row > button:hover {
+  background: #5e3fc5;
+  transform: translateY(-1px);
+}
+
+.bus-suggestions {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #d8cdef;
+  border-radius: 12px;
+  box-shadow: 0 12px 24px rgba(44, 31, 84, 0.14);
+}
+
+.bus-suggestion-item {
+  width: 100%;
+  height: auto;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: left;
+  background: transparent;
+  color: #2f2f37;
+  font-size: 14px;
+  box-shadow: none;
+}
+
+.bus-suggestion-item:hover {
+  background: #f3eeff;
+  color: #4d2bbd;
+  transform: none;
+}
+
+.bus-search-status {
+  margin: 14px 2px 0;
+  font-size: 15px;
+  color: #5a5a66;
+}
+
+.bus-search-status.error {
+  color: #c03a2b;
+}
+
+.bus-search-status.success {
+  color: #2e7d32;
+}
+
+.bus-list {
+  margin-top: 30px;
+  display: grid;
+  gap: 22px;
+}
+
+.bus-item-card {
+  background: #fff;
+  border: 2px solid #272727;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 28px 38px 18px;
+  display: grid;
+  gap: 26px;
+}
+
+.bus-card-main {
+  display: grid;
+  grid-template-columns: minmax(160px, 190px) minmax(0, 1fr) 160px;
+  gap: 26px;
+  align-items: start;
+}
+
+.bus-card-left {
+  display: grid;
+  gap: 16px;
+}
+
+.bus-detail-box {
+  min-height: 58px;
+  border: 1.5px solid #272727;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #242424;
+  text-align: center;
+}
+
+.bus-card-center {
+  display: grid;
+  grid-template-columns: minmax(110px, 1fr) auto minmax(110px, 1fr);
+  grid-template-areas:
+    "date date date"
+    "departure arrow arrival";
+  align-items: center;
+  gap: 20px;
+  min-height: 132px;
+}
+
+.bus-date-box {
+  grid-area: date;
+  justify-self: center;
+  min-width: 170px;
+  min-height: 44px;
+  border: 1.5px solid #272727;
+  display: grid;
+  place-items: center;
+  padding: 8px 18px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #242424;
+  text-align: center;
+}
+
+.bus-time-col:first-of-type {
+  grid-area: departure;
+}
+
+.bus-time-col:last-of-type {
+  grid-area: arrival;
+}
+
+.bus-time-col h4 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  color: #1f1f1f;
+}
+
+.bus-time-col .time {
+  margin: 10px 0 6px;
+  font-size: 24px;
+  color: #333;
+}
+
+.bus-time-col .city {
+  margin: 0;
+  font-size: 15px;
+  color: #3c3c3c;
+}
+
+.bus-arrow {
+  grid-area: arrow;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+  color: #272727;
+}
+
+.bus-arrow-line {
+  width: 64px;
+  height: 1.5px;
+  background: #272727;
+}
+
+.bus-arrow-head {
+  margin-left: 6px;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.bus-seat-box {
+  min-height: 120px;
+  border: 1.5px solid #272727;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 12px;
+  color: #212121;
+}
+
+.bus-seat-box p {
+  margin: 0;
+  font-size: 18px;
+}
+
+.bus-seat-box strong {
+  margin-top: 8px;
+  font-size: 34px;
+  font-weight: 500;
+}
+
+.bus-seat-box span {
+  margin-top: 8px;
+  font-size: 15px;
+  color: #5b5b5b;
+}
+
+.bus-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.bus-inline-btn,
+.book-btn {
+  min-width: 118px;
+  height: 42px;
+  border: 1.5px solid #272727;
+  border-radius: 0;
+  background: #fff;
+  color: #1d1d1d;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 16px;
+}
+
+.bus-inline-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.book-btn {
+  margin-left: auto;
+}
+
+.bus-inline-btn:hover:not(:disabled),
+.book-btn:hover {
+  background: #f3f3f3;
+}
+
+.no-result {
+  margin: 0;
+  color: #5a5a66;
+  font-size: 16px;
+}
+
+@media (max-width: 980px) {
+  .bus-search-row {
+    grid-template-columns: 1fr;
+  }
+
+  .bus-suggestions {
+    position: static;
+    margin-top: 8px;
+  }
+
+  .bus-search-row > button {
+    width: 100%;
+  }
+
+  .bus-item-card {
+    padding: 22px 20px 18px;
+  }
+
+  .bus-card-main {
+    grid-template-columns: 1fr;
+  }
+
+  .bus-card-center {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "date"
+      "departure"
+      "arrow"
+      "arrival";
+    justify-items: start;
+  }
+
+  .bus-date-box {
+    justify-self: start;
+  }
+
+  .bus-arrow {
+    min-width: 0;
+  }
+
+  .bus-seat-box {
+    justify-items: start;
+  }
+
+  .bus-card-actions {
+    justify-content: flex-start;
+  }
+
+  .book-btn {
+    margin-left: 0;
+  }
+}

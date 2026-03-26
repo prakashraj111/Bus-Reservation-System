@@ -1,0 +1,157 @@
+/* Main container */
+.route-container {
+  --stops-count: 1;
+  --track-step: 142px;
+  --track-offset: 64px;
+  --track-height: calc((max(var(--stops-count), 1) - 1) * var(--track-step) + var(--track-offset));
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 58px;
+  min-height: calc(var(--track-height) + 120px);
+  background-color: #e5e5e5;
+  padding: 24px;
+}
+
+/* Actions */
+.route-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 16px 24px 0;
+}
+
+.route-actions button {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 2px solid #111;
+  background-color: #f1c40f;
+  color: #111;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.route-actions button:hover {
+  background-color: #f39c12;
+}
+
+/* Timeline section */
+.timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 34px;
+}
+
+/* Vertical center line */
+.timeline::before {
+  content: "";
+  position: absolute;
+  width: 3px;
+  height: var(--track-height);
+  background-color: #333;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+/* Stop cards */
+.stop-card {
+  background-color: #2c6fb7;
+  color: orange;
+  padding: 12px 22px;
+  border-radius: 12px;
+  border: 2px solid #000;
+  font-size: 18px;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  min-width: 250px;
+  min-height: 90px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.stop-name {
+  font-weight: 700;
+}
+
+.stop-time {
+  margin-top: 6px;
+  font-size: 16px;
+}
+
+/* Bus track section */
+.bus-track {
+  position: relative;
+  height: var(--track-height);
+  display: flex;
+  align-items: flex-end;
+}
+
+/* Track line */
+.track-line {
+  position: absolute;
+  width: 8px;
+  height: 100%;
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
+/* Bus icon */
+.bus-icon {
+  width: 50px;
+  position: absolute;
+  bottom: 0;
+  left: -21px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .route-container {
+    --track-step: 108px;
+    --track-offset: 52px;
+    /* gap: 20px; */
+    padding: 18px 10px;
+    overflow-x: auto;
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+
+  .bus-track {
+    flex: 0 0 auto;
+  }
+
+  .timeline {
+    flex: 0 0 auto;
+    gap: 20px;
+  }
+
+  .stop-card {
+    min-width: 130px;
+    min-height: 62px;
+    padding: 8px 10px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .stop-time {
+    margin-top: 4px;
+    font-size: 12px;
+  }
+
+  .track-line {
+    width: 6px;
+  }
+
+  .bus-icon {
+    width: 36px;
+    left: -15px;
+  }
+}

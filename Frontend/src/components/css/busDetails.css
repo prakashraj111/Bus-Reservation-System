@@ -1,0 +1,89 @@
+.bus-container{
+  display: flex;
+  gap: 40px;
+  padding: 40px;
+  align-items: flex-start;
+}
+
+/* LEFT SIDE */
+
+.bus-left{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bus-image{
+  width: 350px;
+  height: 300px;
+  border: 2px solid black;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.bus-image img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bus-extra{
+  width: 350px;
+  height: 50px;
+  border: 2px solid black;
+  border-radius: 10px;
+}
+
+.bus-buttons{
+  display: flex;
+  gap: 20px;
+}
+
+.bus-buttons button{
+  padding: 10px 20px;
+  border: 2px solid black;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+}
+
+/* RIGHT SIDE */
+
+.bus-right{
+  width: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bus-title{
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.bus-description{
+  border: 2px solid black;
+  border-radius: 20px;
+  padding: 20px;
+  height: 120px;
+}
+
+.bus-seats{
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.bus-info-row{
+  display: flex;
+  gap: 20px;
+}
+
+.bus-type,
+.bus-number{
+  border: 2px solid black;
+  border-radius: 15px;
+  padding: 15px;
+  flex: 1;
+}

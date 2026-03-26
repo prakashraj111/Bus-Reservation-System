@@ -1,0 +1,122 @@
+.view-bus-category {
+  width: min(1240px, 94%);
+  margin: 28px auto 34px;
+}
+
+.view-bus-filter-bar {
+  background: #ebebed;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.view-bus-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(520px, 100%);
+}
+
+.view-bus-search-wrap input {
+  flex: 1;
+  height: 50px;
+  border: none;
+  border-radius: 6px;
+  padding: 0 14px;
+  background: #e2e2e4;
+  color: #5f5f69;
+  font-size: 22px;
+}
+
+.view-bus-search-wrap input::placeholder {
+  color: #9f9fa7;
+}
+
+.view-bus-search-wrap button {
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 6px;
+  background: #7a3ef3;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.view-bus-filter-bar select {
+  width: min(360px, 100%);
+  height: 50px;
+  border: none;
+  border-radius: 6px;
+  padding: 0 14px;
+  background: #e2e2e4;
+  color: #5f5f69;
+  font-size: 30px;
+  appearance: none;
+}
+
+.view-bus-grid {
+  margin-top: 26px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.view-bus-card {
+  background: #ebebed;
+  border-radius: 12px;
+  padding: 14px 14px 20px;
+}
+
+.view-bus-card-image {
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+}
+
+.view-bus-card-footer {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.view-bus-card-footer h3 {
+  font-size: 37px;
+  color: #35373d;
+}
+
+.view-bus-card-footer p {
+  font-size: 23px;
+  color: #74747d;
+}
+
+@media (max-width: 1024px) {
+  .view-bus-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .view-bus-search-wrap {
+    width: 100%;
+  }
+
+  .view-bus-filter-bar select {
+    width: 100%;
+  }
+
+  .view-bus-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .view-bus-grid {
+    grid-template-columns: 1fr;
+  }
+}

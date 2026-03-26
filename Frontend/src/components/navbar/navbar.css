@@ -1,0 +1,91 @@
+.topbar {
+  height: 76px;
+  background: #efeff0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar-inner {
+  width: min(1240px, 94%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.brand-logo {
+  width: 105px;
+}
+
+.menu {
+  display: flex;
+  gap: 20px;
+  margin-right: auto;
+  flex-wrap: wrap;
+}
+
+.menu a {
+  text-decoration: none;
+  color: #4f4f58;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.menu a.active {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.contact-pill {
+  background: var(--primary);
+  border-radius: 8px;
+  color: #fff;
+  min-width: 188px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px 0 34px;
+  position: relative;
+}
+
+.contact-icon {
+  width: 31px;
+  height: 31px;
+  border-radius: 50%;
+  border: 3px solid #efeff0;
+  position: absolute;
+  left: -11px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  background: var(--primary);
+}
+
+.contact-pill p:first-child {
+  font-size: 12px;
+}
+
+.contact-pill p:last-child {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.logout-btn {
+  border: none;
+  background: #333;
+  color: #fff;
+  border-radius: 8px;
+  height: 40px;
+  padding: 0 12px;
+  cursor: pointer;
+}

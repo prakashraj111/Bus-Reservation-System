@@ -1,0 +1,68 @@
+.bus-card{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 2px solid #333;
+  border-radius: 20px;
+  padding: 20px;
+  width: 80%;
+  margin: 20px auto;
+  gap: 20px;
+  background: #f9f9f9;
+}
+
+/* image box */
+.bus-image{
+  width: 150px;
+  height: 120px;
+  border: 2px solid #333;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bus-image img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* middle info */
+.bus-info{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.bus-title{
+  border: 2px solid #333;
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: bold;
+}
+
+.bus-description{
+  border: 2px solid #333;
+  border-radius: 15px;
+  padding: 15px;
+}
+
+/* seats box */
+.bus-seats{
+  width: 130px;
+  border: 2px solid #333;
+  border-radius: 20px;
+  text-align: center;
+  padding: 15px;
+}
+
+.bus-seats p{
+  margin: 0;
+}
+
+.bus-seats h2{
+  margin-top: 10px;
+}
