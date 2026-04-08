@@ -1,15 +1,19 @@
 const Trip = require("../../models/tripModel");
+const Ticket = require("../../models/ticketModel");
+const SeatLock = require("../../models/seatLockModel");
 const catchAsync = require("../../utils/catchAsync");
+const { validateSearchPayload, validateSuggestionQuery } = require("../../utils/validation");
 
 exports.searchTripsAdvanced = catchAsync(async (req, res, next) => {
-  let { from, to, travelDate } = req.query;
-
-  if (!from || !to || !travelDate) {
+  const validation = validateSearchPayload(req.query);
+  if (validation.error) {
     return res.status(400).json({
       status: "fail",
-      message: "from, to and travelDate are required",
+      message: validation.error,
     });
   }
+
+  let { from, to, travelDate } = validation.value;
 
   // Normalize input (basic fuzzy improvement)
   from = from.trim().toLowerCase();
@@ -134,6 +138,7 @@ exports.searchTripsAdvanced = catchAsync(async (req, res, next) => {
         departureTime: 1,
         arrivalTime: 1,
         seatPrice: 1,
+        totalSeats: 1,
         availableSeats: 1,
         score: 1,
         "route.from": 1,
@@ -144,16 +149,86 @@ exports.searchTripsAdvanced = catchAsync(async (req, res, next) => {
     },
   ]);
 
+  const tripIds = trips.map((trip) => trip._id);
+  const now = new Date();
+
+  const [ticketCounts, lockCounts] = await Promise.all([
+    Ticket.aggregate([
+      {
+        $match: {
+          tripId: { $in: tripIds },
+          ticketStatus: "confirmed"
+        }
+      },
+      {
+        $group: {
+          _id: "$tripId",
+          bookedSeatCount: { $sum: 1 }
+        }
+      }
+    ]),
+    SeatLock.aggregate([
+      {
+        $match: {
+          tripId: { $in: tripIds },
+          lockStatus: { $in: ["pending", "details_completed", "payment_initiated"] },
+          holdExpiresAt: { $gt: now }
+        }
+      },
+      {
+        $project: {
+          tripId: 1,
+          lockedSeatCount: { $size: "$seatNumbers" }
+        }
+      },
+      {
+        $group: {
+          _id: "$tripId",
+          lockedSeatCount: { $sum: "$lockedSeatCount" }
+        }
+      }
+    ])
+  ]);
+
+  const bookedMap = new Map(
+    ticketCounts.map((item) => [item._id.toString(), item.bookedSeatCount])
+  );
+  const lockedMap = new Map(
+    lockCounts.map((item) => [item._id.toString(), item.lockedSeatCount])
+  );
+
+  const tripsWithLiveSeats = trips.map((trip) => {
+    const bookedSeatCount = bookedMap.get(trip._id.toString()) || 0;
+    const lockedSeatCount = lockedMap.get(trip._id.toString()) || 0;
+    const totalSeats = Number(trip.totalSeats || trip.bus?.totalSeats || 0);
+
+    return {
+      ...trip,
+      bookedSeatCount,
+      lockedSeatCount,
+      availableSeatCount: Math.max(totalSeats - bookedSeatCount - lockedSeatCount, 0)
+    };
+  });
+
   res.status(200).json({
     status: "success",
-    results: trips.length,
-    data: trips,
+    results: tripsWithLiveSeats.length,
+    data: tripsWithLiveSeats,
   });
 });
 
 exports.getSuggestions = async (req, res) => {
   const Route = require("../../models/busRoutemodel");
-  const { query } = req.query;
+  const validation = validateSuggestionQuery(req.query.query);
+
+  if (validation.error) {
+    return res.status(400).json({
+      status: "fail",
+      message: validation.error
+    });
+  }
+
+  const query = validation.value;
 
   const suggestions = await Route.aggregate([
     {

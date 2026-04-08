@@ -13,6 +13,9 @@ const formatDate = (value) => {
 
 const streamBookingTicketsPdf = ({ booking, tickets, res }) => {
   const doc = new PDFDocument({ margin: 40, size: "A4" });
+  const trip = booking?.tripId || {};
+  const liveBus = trip?.busId || {};
+  const liveRoute = trip?.routeId || {};
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
@@ -28,6 +31,15 @@ const streamBookingTicketsPdf = ({ booking, tickets, res }) => {
     }
 
     const snapshot = ticket.snapshot || {};
+    const routeFrom = liveRoute?.from?.stopName || snapshot.routeFrom || "Origin";
+    const routeTo = liveRoute?.to?.stopName || snapshot.routeTo || "Destination";
+    const travelDate = trip?.travelDate || snapshot.travelDate;
+    const departureTime = trip?.departureTime || snapshot.departureTime || "N/A";
+    const arrivalTime = trip?.arrivalTime || snapshot.arrivalTime || "N/A";
+    const fare = trip?.seatPrice ?? snapshot.seatPrice ?? 0;
+    const busName = liveBus?.busName || snapshot.busName || "Bus Service";
+    const busType = liveBus?.type || snapshot.busType || "N/A";
+    const busNumber = liveBus?.busNumberPlate || snapshot.busNumber || "N/A";
 
     doc
       .roundedRect(36, 36, 523, 760, 18)
@@ -51,11 +63,11 @@ const streamBookingTicketsPdf = ({ booking, tickets, res }) => {
     doc
       .fillColor("#1e3a8a")
       .fontSize(18)
-      .text(`${snapshot.routeFrom || "Origin"} -> ${snapshot.routeTo || "Destination"}`, 76, 168)
+      .text(`${routeFrom} -> ${routeTo}`, 76, 168)
       .fillColor("#334155")
       .fontSize(12)
-      .text(`Travel Date: ${formatDate(snapshot.travelDate)}`, 76, 198)
-      .text(`Departure: ${snapshot.departureTime || "N/A"}    Arrival: ${snapshot.arrivalTime || "N/A"}`, 290, 198);
+      .text(`Travel Date: ${formatDate(travelDate)}`, 76, 198)
+      .text(`Departure: ${departureTime}    Arrival: ${arrivalTime}`, 290, 198);
 
     doc
       .fillColor("#0f172a")
@@ -75,10 +87,10 @@ const streamBookingTicketsPdf = ({ booking, tickets, res }) => {
       ["Boarding", ticket.boardingPoint],
       ["Dropping", ticket.droppingPoint],
       ["Seat", ticket.seatLabel],
-      ["Fare", `Rs. ${snapshot.seatPrice || 0}`],
-      ["Bus", snapshot.busName || "Bus Service"],
-      ["Bus Type", snapshot.busType || "N/A"],
-      ["Bus Number", snapshot.busNumber || "N/A"],
+      ["Fare", `Rs. ${fare}`],
+      ["Bus", busName],
+      ["Bus Type", busType],
+      ["Bus Number", busNumber],
       ["Status", ticket.ticketStatus]
     ];
 

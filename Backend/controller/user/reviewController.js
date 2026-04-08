@@ -1,107 +1,120 @@
-const Bus = require("../../model/busModel")
-const Review = require("../../model/reviewModel")
+const Bus = require("../../models/busModel");
+const Review = require("../../models/reviewModel");
+const { isValidObjectId, validateReviewPayload } = require("../../utils/validation");
 
 exports.createReview = async (req, res) => {
-  const busId = req.params.id
-  const { comment, rating } = req.body
-  if(!comment || !rating){
-    return res.status(400).json({
-        message: "Some fields are missing!"
-    })
+  try {
+    const busId = req.params.id;
+
+    if (!isValidObjectId(busId)) {
+      return res.status(400).json({ message: "Invalid bus ID" });
+    }
+
+    const validation = validateReviewPayload(req.body);
+    if (validation.error) {
+      return res.status(400).json({ message: validation.error });
+    }
+
+    const bus = await Bus.findById(busId);
+    if (!bus) {
+      return res.status(404).json({ message: "Bus not found" });
+    }
+
+    const review = await Review.create({
+      userId: req.user.id,
+      comment: validation.value.comment,
+      rating: validation.value.rating
+    });
+
+    await Bus.findByIdAndUpdate(
+      busId,
+      { $push: { reviews: review._id } },
+      { returnDocument: "after" }
+    );
+
+    res.status(201).json({
+      message: "Review added successfully",
+      data: review
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-//   console.log(req.user)
-  // create review
-  const review = await Review.create({
-    userId: req.user.id,
-    comment,
-    rating
-  })
-
-  // push review id into bus
-  await Bus.findByIdAndUpdate(
-    busId,
-    { $push: { reviews: review._id } },
-    { new: true }
-  )
-
-  res.status(201).json({
-    message: "Review added successfully",
-    data: review
-  })
-}
+};
 
 exports.deleteReview = async (req, res) => {
   try {
-    const { reviewId } = req.params
+    const { reviewId } = req.params;
 
-    const review = await Review.findById(reviewId)
-    if (!review) {
-      return res.status(404).json({ message: "Review not found" })
+    if (!isValidObjectId(reviewId)) {
+      return res.status(400).json({ message: "Invalid review ID" });
     }
 
-    // 🔒 Ownership check
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
     if (review.userId.toString() !== req.user.id) {
       return res.status(403).json({
         message: "You are not allowed to delete this review"
-      })
+      });
     }
 
-    // 🧹 Remove review reference from Bus
     await Bus.updateOne(
       { reviews: reviewId },
       { $pull: { reviews: reviewId } }
-    )
+    );
 
-    // ❌ Delete review
-    await Review.findByIdAndDelete(reviewId)
+    await Review.findByIdAndDelete(reviewId);
 
     res.status(200).json({
       message: "Review deleted successfully"
-    })
-
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
 exports.updateReview = async (req, res) => {
   try {
-    const { reviewId } = req.params
-    const { comment, rating } = req.body
+    const { reviewId } = req.params;
 
-    if (!comment && !rating) {
-      return res.status(400).json({
-        message: "Nothing to update"
-      })
+    if (!isValidObjectId(reviewId)) {
+      return res.status(400).json({ message: "Invalid review ID" });
     }
 
-    const review = await Review.findById(reviewId)
+    const review = await Review.findById(reviewId);
     if (!review) {
       return res.status(404).json({
         message: "Review not found"
-      })
+      });
     }
 
-    // 🔐 Ownership check
     if (review.userId.toString() !== req.user.id) {
       return res.status(403).json({
         message: "You are not allowed to update this review"
-      })
+      });
     }
 
-    // ✏️ Update fields
-    if (comment) review.comment = comment
-    if (rating) review.rating = rating
+    const validation = validateReviewPayload({
+      comment: req.body.comment ?? review.comment,
+      rating: req.body.rating ?? review.rating
+    });
 
-    await review.save()
+    if (validation.error) {
+      return res.status(400).json({ message: validation.error });
+    }
+
+    review.comment = validation.value.comment;
+    review.rating = validation.value.rating;
+
+    await review.save();
 
     res.status(200).json({
       message: "Review updated successfully",
       data: review
-    })
-
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: error.message });
   }
-}
-
+};

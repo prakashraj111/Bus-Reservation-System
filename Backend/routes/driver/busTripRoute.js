@@ -7,7 +7,10 @@ const {
   deleteTrip,
   getAllTrips,
   cancelTrip,
-  findYourScheduledTrips
+  findYourScheduledTrips,
+  findYourCancelledTrips,
+  findYourCompletedTrips,
+  getTripPaymentsBySeat
 } = require("../../controller/driver/busTripController");
 const isAuthenticated = require("../../middleware/isAuthenticated");
 const restrictTo = require("../../middleware/restrictTo");
@@ -31,10 +34,22 @@ router
   .get(...protectTripMutation, findYourScheduledTrips);
 
 router
+  .route("/cancelled")
+  .get(...protectTripMutation, findYourCancelledTrips);
+
+router
+  .route("/completed")
+  .get(...protectTripMutation, findYourCompletedTrips);
+
+router
   .route("/:id")
   .get(getSingleTrip)
   .put(...protectTripMutation, updateTrip)
   .delete(...protectTripMutation, deleteTrip);
+
+router
+  .route("/:id/payments")
+  .get(...protectTripMutation, getTripPaymentsBySeat);
 
 router
   .route("/:id/cancel")

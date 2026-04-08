@@ -8,10 +8,10 @@ const {
 } = require("../../controller/driver/driverController");
 const isAuthenticated = require("../../middleware/isAuthenticated");
 const restrictTo = require("../../middleware/restrictTo");
-const { multer, storage } = require("../../middleware/multerConfig");
+const { multer, uploadConfig } = require("../../middleware/multerConfig");
 
 const router = express.Router();
-const upload = multer({ storage });
+const upload = multer(uploadConfig);
 
 router
   .route("/")

@@ -17,7 +17,8 @@ const routeSchema = new mongoose.Schema({
     from: {
       stopName: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
      departureTime: {
       type: String,
@@ -27,15 +28,16 @@ const routeSchema = new mongoose.Schema({
     to: {
       stopName: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
      arrivalTime: {
       type: String,
       required: true
     }
     },
-    distanceKm: { type: Number, default: 0 },
-    estimatedDurationMin: { type: Number, default: 0 },
+    distanceKm: { type: Number, default: 0, min: 0 },
+    estimatedDurationMin: { type: Number, default: 0, min: 0 },
     stops: { type: [routeStopSchema], default: [] },
   },
   { timestamps: true }

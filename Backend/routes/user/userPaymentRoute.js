@@ -3,6 +3,7 @@ const router = express.Router({ mergeParams: true });
 const {
   createPayment,
   getAllPayments,
+  getMyPayments,
   getSinglePayment,
   updatePayment,
   deletePayment,
@@ -16,6 +17,7 @@ const restrictTo = require("../../middleware/restrictTo");
 router.use(isAuthenticated);
 
 router.route("/").post(createPayment);
+router.route("/my").get(getMyPayments);
 router.route("/all").get(restrictTo("admin"), getAllPayments);
 
 router
@@ -24,6 +26,7 @@ router
   .put(updatePayment)
   .delete(deletePayment);
 
+router.route("/verify").post(verifyEsewaPayment);
 router.route("/:id/verify").post(verifyEsewaPayment);
 router.route("/:id/paid").patch(markPaymentPaid);
 router.route("/:id/failed").patch(markPaymentFailed);

@@ -9,6 +9,7 @@ const {
   generateTicketNumber,
   getSeatLabel
 } = require("../../utils/ticketHelpers");
+const { isValidObjectId, validatePassengerTickets } = require("../../utils/validation");
 
 const isOwnerOrAdmin = (resourceUserId, user) => {
   if (!user) return false;
@@ -46,38 +47,11 @@ const getBookingPayload = async (bookingId, req) => {
   return { booking, tickets, payment };
 };
 
-const validateTicketInput = (tickets, booking) => {
-  if (!Array.isArray(tickets) || tickets.length !== booking.seatCount) {
-    return "Ticket details must be provided for every selected seat";
-  }
-
-  const bookingSeats = [...booking.seatNumbers].sort((a, b) => a - b);
-  const submittedSeats = [...tickets.map((ticket) => Number(ticket.seatNumber))].sort((a, b) => a - b);
-
-  if (JSON.stringify(bookingSeats) !== JSON.stringify(submittedSeats)) {
-    return "Ticket seat numbers do not match the locked booking seats";
-  }
-
-  const hasInvalidTicket = tickets.some((ticket) => {
-    return (
-      !ticket.passengerName?.trim() ||
-      !Number.isFinite(Number(ticket.passengerAge)) ||
-      Number(ticket.passengerAge) <= 0 ||
-      !["male", "female", "other"].includes(ticket.passengerGender) ||
-      !ticket.passengerPhone?.trim() ||
-      !ticket.boardingPoint?.trim() ||
-      !ticket.droppingPoint?.trim()
-    );
-  });
-
-  if (hasInvalidTicket) {
-    return "Every ticket form must be completed with valid passenger details";
-  }
-
-  return null;
-};
-
 exports.getBookingDetails = catchAsync(async (req, res) => {
+  if (!isValidObjectId(req.params.bookingId)) {
+    return res.status(400).json({ success: false, message: "Invalid booking ID" });
+  }
+
   const payload = await getBookingPayload(req.params.bookingId, req);
 
   if (!payload) {
@@ -91,6 +65,10 @@ exports.getBookingDetails = catchAsync(async (req, res) => {
 });
 
 exports.upsertBookingTickets = catchAsync(async (req, res) => {
+  if (!isValidObjectId(req.params.bookingId)) {
+    return res.status(400).json({ success: false, message: "Invalid booking ID" });
+  }
+
   const payload = await getBookingPayload(req.params.bookingId, req);
 
   if (!payload) {
@@ -117,9 +95,9 @@ exports.upsertBookingTickets = catchAsync(async (req, res) => {
     });
   }
 
-  const validationError = validateTicketInput(ticketInputs, booking);
-  if (validationError) {
-    return res.status(400).json({ success: false, message: validationError });
+  const validation = validatePassengerTickets(ticketInputs, booking.seatNumbers);
+  if (validation.error) {
+    return res.status(400).json({ success: false, message: validation.error });
   }
 
   const trip = await Trip.findById(booking.tripId)
@@ -128,8 +106,8 @@ exports.upsertBookingTickets = catchAsync(async (req, res) => {
   const snapshot = buildTripSnapshot(trip);
 
   await Promise.all(
-    ticketInputs.map(async (ticketInput) => {
-      const seatNumber = Number(ticketInput.seatNumber);
+    validation.value.map(async (ticketInput) => {
+      const seatNumber = ticketInput.seatNumber;
       const currentTicket = await Ticket.findOne({
         bookingId: booking._id,
         seatNumber
@@ -141,12 +119,12 @@ exports.upsertBookingTickets = catchAsync(async (req, res) => {
         userId: booking.userId._id || booking.userId,
         seatNumber,
         seatLabel: getSeatLabel(seatNumber),
-        passengerName: ticketInput.passengerName.trim(),
-        passengerAge: Number(ticketInput.passengerAge),
+        passengerName: ticketInput.passengerName,
+        passengerAge: ticketInput.passengerAge,
         passengerGender: ticketInput.passengerGender,
-        passengerPhone: ticketInput.passengerPhone.trim(),
-        boardingPoint: ticketInput.boardingPoint.trim(),
-        droppingPoint: ticketInput.droppingPoint.trim(),
+        passengerPhone: ticketInput.passengerPhone,
+        boardingPoint: ticketInput.boardingPoint,
+        droppingPoint: ticketInput.droppingPoint,
         ticketStatus: "pending",
         snapshot
       };
@@ -177,6 +155,10 @@ exports.upsertBookingTickets = catchAsync(async (req, res) => {
 });
 
 exports.getBookingTickets = catchAsync(async (req, res) => {
+  if (!isValidObjectId(req.params.bookingId)) {
+    return res.status(400).json({ success: false, message: "Invalid booking ID" });
+  }
+
   const payload = await getBookingPayload(req.params.bookingId, req);
 
   if (!payload) {
@@ -194,6 +176,10 @@ exports.getBookingTickets = catchAsync(async (req, res) => {
 });
 
 exports.downloadBookingTicketsPdf = catchAsync(async (req, res) => {
+  if (!isValidObjectId(req.params.bookingId)) {
+    return res.status(400).json({ success: false, message: "Invalid booking ID" });
+  }
+
   const payload = await getBookingPayload(req.params.bookingId, req);
 
   if (!payload) {
@@ -258,6 +244,10 @@ exports.getMyBookingHistory = catchAsync(async (req, res) => {
 });
 
 exports.releaseBookingHold = catchAsync(async (req, res) => {
+  if (!isValidObjectId(req.params.bookingId)) {
+    return res.status(400).json({ success: false, message: "Invalid booking ID" });
+  }
+
   const payload = await getBookingPayload(req.params.bookingId, req);
 
   if (!payload) {

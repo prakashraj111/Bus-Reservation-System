@@ -1,4 +1,5 @@
 const Booking = require("../../models/bookingModel");
+const SeatLock = require("../../models/seatLockModel");
 const Trip = require("../../models/tripModel");
 const catchAsync = require("../../utils/catchAsync");
 const {
@@ -7,6 +8,7 @@ const {
   getTripSeatSnapshot,
   releaseExpiredSeatLocksForTrip
 } = require("../../utils/seatLockService");
+const { isValidObjectId, validateSeatSelection } = require("../../utils/validation");
 
 const isOwnerOrAdmin = (resourceUserId, user) => {
   if (!user) return false;
@@ -14,11 +16,11 @@ const isOwnerOrAdmin = (resourceUserId, user) => {
   return resourceUserId && resourceUserId.toString() === user.id;
 };
 
-const normalizeSeatNumbers = (seatNumbers) =>
-  [...new Set(seatNumbers)].sort((a, b) => a - b);
-
 exports.getSeatAvailability = catchAsync(async (req, res) => {
   const tripId = req.params.tripId;
+  if (!isValidObjectId(tripId)) {
+    return res.status(400).json({ success: false, message: "Invalid trip ID" });
+  }
 
   await releaseExpiredSeatLocksForTrip(tripId);
 
@@ -43,36 +45,8 @@ exports.getSeatAvailability = catchAsync(async (req, res) => {
 
 exports.createBooking = catchAsync(async (req, res) => {
   const tripId = req.params.tripId;
-  const { seatNumbers, totalAmount } = req.body;
-
-  if (!tripId || !Array.isArray(seatNumbers) || seatNumbers.length === 0 || totalAmount == null) {
-    return res.status(400).json({
-      success: false,
-      message: "tripId, seatNumbers(array), and totalAmount are required"
-    });
-  }
-
-  if (seatNumbers.length > 5) {
-    return res.status(400).json({
-      success: false,
-      message: "You can select a maximum of 5 seats at once"
-    });
-  }
-
-  const invalidSeat = seatNumbers.some((seat) => !Number.isInteger(seat) || seat <= 0);
-  if (invalidSeat) {
-    return res.status(400).json({
-      success: false,
-      message: "Seat numbers must be positive integers"
-    });
-  }
-
-  const uniqueSeats = normalizeSeatNumbers(seatNumbers);
-  if (uniqueSeats.length !== seatNumbers.length) {
-    return res.status(400).json({
-      success: false,
-      message: "Duplicate seat numbers are not allowed"
-    });
+  if (!isValidObjectId(tripId)) {
+    return res.status(400).json({ success: false, message: "Invalid trip ID" });
   }
 
   await releaseExpiredSeatLocksForTrip(tripId);
@@ -82,13 +56,12 @@ exports.createBooking = catchAsync(async (req, res) => {
     return res.status(404).json({ success: false, message: "Trip not found" });
   }
 
-  const outOfRangeSeat = uniqueSeats.some((seat) => seat > trip.totalSeats);
-  if (outOfRangeSeat) {
-    return res.status(400).json({
-      success: false,
-      message: "One or more seat numbers exceed total seats"
-    });
+  const validation = validateSeatSelection(req.body, trip);
+  if (validation.error) {
+    return res.status(400).json({ success: false, message: validation.error });
   }
+
+  const { seatNumbers: uniqueSeats, totalAmount } = validation.value;
 
   const lockedTrip = await Trip.findOneAndUpdate(
     {
@@ -100,7 +73,7 @@ exports.createBooking = catchAsync(async (req, res) => {
       $addToSet: { bookedSeats: { $each: uniqueSeats } },
       $inc: { availableSeats: -uniqueSeats.length }
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 
   if (!lockedTrip) {
@@ -110,16 +83,12 @@ exports.createBooking = catchAsync(async (req, res) => {
     });
   }
 
-  const bookingCode = `BK${Date.now()}${Math.floor(Math.random() * 1000)}`;
-
-  const booking = await Booking.create({
+  const seatLock = await SeatLock.create({
     userId: req.user.id,
     tripId,
     seatNumbers: uniqueSeats,
     seatCount: uniqueSeats.length,
     totalAmount,
-    bookingCode,
-    bookingStatus: "pending",
     holdExpiresAt: getSeatLockExpiry()
   });
 
@@ -128,9 +97,9 @@ exports.createBooking = catchAsync(async (req, res) => {
   res.status(201).json({
     success: true,
     message: "Seat lock created. Complete payment before the hold expires.",
-    data: booking,
+    data: seatLock,
     seatLock: {
-      expiresAt: booking.holdExpiresAt,
+      expiresAt: seatLock.holdExpiresAt,
       seats: seatSnapshot
     }
   });

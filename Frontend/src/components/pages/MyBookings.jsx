@@ -92,9 +92,15 @@ function MyBookings() {
                   </div>
 
                   <div className="actions">
-                    <Link to={`/booking/${booking._id}/details`}>Passenger Details</Link>
                     <Link to={`/booking/${booking._id}/tickets`}>View Tickets</Link>
                   </div>
+                  {trip?.busId?._id ? (
+                    <div className="actions">
+                      <Link to="/view-my-bus" state={{ busId: trip.busId._id }}>
+                        View Bus Info
+                      </Link>
+                    </div>
+                  ) : null}
                 </article>
               );
             })}

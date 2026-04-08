@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema(
   {
-    bookingId: { type: mongoose.Schema.Types.ObjectId, ref: "Booking", required: true },
+    seatLockId: { type: mongoose.Schema.Types.ObjectId, ref: "SeatLock", required: true },
+    bookingId: { type: mongoose.Schema.Types.ObjectId, ref: "Booking", default: null },
     amount: { type: Number, required: true, min: 0 },
     method: { type: String, enum: ["khalti", "esewa"], default: "esewa" },
     transactionId: { type: String, default: "" },

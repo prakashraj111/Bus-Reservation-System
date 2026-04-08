@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../../models/userModel");
 const catchAsync = require("../../utils/catchAsync");
+const { validateAuthPayload } = require("../../utils/validation");
 
 const signToken = (user) => {
   return jwt.sign(
@@ -12,14 +13,12 @@ const signToken = (user) => {
 };
 
 exports.registerUser = catchAsync(async (req, res) => {
-  const { username, email, password } = req.body;
-
-  if (!username || !email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "Please provide username, email and password"
-    });
+  const validation = validateAuthPayload(req.body, { requireUsername: true });
+  if (validation.error) {
+    return res.status(400).json({ success: false, message: validation.error });
   }
+
+  const { username, email, password } = validation.value;
 
   const userFound = await User.findOne({ email });
   if (userFound) {
@@ -51,14 +50,12 @@ exports.registerUser = catchAsync(async (req, res) => {
 });
 
 exports.loginUser = catchAsync(async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "Please provide email and password"
-    });
+  const validation = validateAuthPayload(req.body);
+  if (validation.error) {
+    return res.status(400).json({ success: false, message: validation.error });
   }
+
+  const { email, password } = validation.value;
 
   const userFound = await User.findOne({ email });
   if (!userFound) {
@@ -96,5 +93,42 @@ exports.logoutUser = catchAsync(async (req, res) => {
     success: true,
     message: "User logged out successfully",
     token: null
+  });
+});
+
+exports.becomeDriver = catchAsync(async (req, res) => {
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found"
+    });
+  }
+
+  if (user.role === "admin") {
+    return res.status(400).json({
+      success: false,
+      message: "Admin account cannot be changed to driver through this action"
+    });
+  }
+
+  if (user.role !== "driver") {
+    user.role = "driver";
+    await user.save();
+  }
+
+  const token = signToken(user);
+
+  res.status(200).json({
+    success: true,
+    message: "Your account is ready for driver features",
+    token,
+    data: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role
+    }
   });
 });

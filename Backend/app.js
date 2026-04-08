@@ -20,23 +20,30 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("./uploads"));
 
 const authRoute = require("./routes/auth/authRoute");
+const adminRoutes = require("./routes/admin/adminRoute");
 const driverRoutes = require("./routes/driver/driverRoute");
 const driverBusRoute = require("./routes/driver/driverBusRoute");
 const driverBusTripRoute = require("./routes/driver/busTripRoute");
 const userBookingRoutes = require("./routes/user/userBookingRoute");
 const userPaymentRoutes = require("./routes/user/userPaymentRoute");
+const userReviewRoutes = require("./routes/user/userReviewRoute");
+const userSeatLockRoutes = require("./routes/user/userSeatLockRoute");
 const userTicketRoutes = require("./routes/user/userTicketRoute");
 const errorHandler = require("./middleware/errorMiddleware");
 
 connectDatabase(process.env.MONGO_URI);
 
 app.use("/api/auth", authRoute);
+app.use("/api/admin", adminRoutes);
 app.use("/api/bus", driverRoutes);
 app.use("/api/bus/route", driverBusRoute);
 app.use("/api/trip", driverBusTripRoute);
 app.use("/api/bus/:busId/route/:routeId/trip", driverBusTripRoute);
 app.use("/api/trip/:tripId/book", userBookingRoutes);
-app.use("/api/book/:bookId/pay", userPaymentRoutes);
+app.use("/api/bus/:id/review", userReviewRoutes);
+app.use("/api/seat-lock", userSeatLockRoutes);
+app.use("/api/seat-lock/:seatLockId/pay", userPaymentRoutes);
+app.use("/api/payment", userPaymentRoutes);
 app.use("/api/booking", userTicketRoutes);
 
 app.use(errorHandler);

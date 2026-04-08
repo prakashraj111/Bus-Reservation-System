@@ -2,11 +2,15 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../css/addBusRoute.css";
 import api from "../../services/api";
+import { sanitizeText, validateRouteForm } from "../../utils/validation";
+import { useNotification } from "../notifications/NotificationProvider";
 
 function AddBusRoute() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { showError, showSuccess } = useNotification();
   const busId = location.state?.busId || "";
+  const intent = location.state?.intent || "";
 
   const [formData, setFormData] = useState({
     from: {
@@ -72,7 +76,19 @@ function AddBusRoute() {
     e.preventDefault();
 
     if (!busId) {
-      setStatus({ type: "error", message: "Bus ID is required" });
+      const message = "Bus ID is required";
+      setStatus({ type: "error", message });
+      showError(message);
+      return;
+    }
+
+    const validationMessage = validateRouteForm({
+      ...formData,
+      stops
+    });
+    if (validationMessage) {
+      setStatus({ type: "error", message: validationMessage });
+      showError(validationMessage);
       return;
     }
 
@@ -81,15 +97,32 @@ function AddBusRoute() {
 
     const routeData = {
       busId,
-      ...formData,
-      stops
+      from: {
+        stopName: sanitizeText(formData.from.stopName),
+        departureTime: formData.from.departureTime
+      },
+      to: {
+        stopName: sanitizeText(formData.to.stopName),
+        arrivalTime: formData.to.arrivalTime
+      },
+      distanceKm: Number(formData.distanceKm) || 0,
+      estimatedDurationMin: Number(formData.estimatedDurationMin),
+      stops: stops
+        .map((stop) => ({
+          stopName: sanitizeText(stop.stopName),
+          arrivalTime: stop.arrivalTime,
+          departureTime: stop.departureTime
+        }))
+        .filter((stop) => stop.stopName)
     };
 
     try {
       const response = await api.post("/api/bus/route", routeData);
       const createdRoute = response.data?.data || null;
+      showSuccess(response.data?.message || "Route created successfully");
       navigate("/bus-route", {
-        state: { busId, routeId: createdRoute?._id }
+        state: { busId, routeId: createdRoute?._id, intent },
+        replace: true
       });
     } catch (error) {
       const message =
@@ -97,6 +130,7 @@ function AddBusRoute() {
         error?.message ||
         "Failed to create route";
       setStatus({ type: "error", message });
+      showError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -126,6 +160,7 @@ function AddBusRoute() {
             name="stopName"
             value={formData.from.stopName}
             onChange={(e) => handleChange(e, "from")}
+            maxLength={60}
             required
           />
         </div>
@@ -138,6 +173,7 @@ function AddBusRoute() {
             name="departureTime"
             value={formData.from.departureTime}
             onChange={(e) => handleChange(e, "from")}
+            required
           />
         </div>
 
@@ -152,6 +188,7 @@ function AddBusRoute() {
             name="stopName"
             value={formData.to.stopName}
             onChange={(e) => handleChange(e, "to")}
+            maxLength={60}
             required
           />
         </div>
@@ -163,6 +200,7 @@ function AddBusRoute() {
             name="arrivalTime"
             value={formData.to.arrivalTime}
             onChange={(e) => handleChange(e, "to")}
+            required
           />
         </div>
 
@@ -178,6 +216,8 @@ function AddBusRoute() {
             name="distanceKm"
             value={formData.distanceKm}
             onChange={handleMainChange}
+            min="0"
+            step="0.1"
           />
         </div>
 
@@ -188,6 +228,9 @@ function AddBusRoute() {
             name="estimatedDurationMin"
             value={formData.estimatedDurationMin}
             onChange={handleMainChange}
+            min="1"
+            step="1"
+            required
           />
         </div>
 
@@ -204,6 +247,7 @@ function AddBusRoute() {
               placeholder="Stop Name"
               value={stop.stopName}
               onChange={(e) => handleStopChange(index, e)}
+              maxLength={60}
             />
 
             <input

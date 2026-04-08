@@ -1,12 +1,26 @@
 import "./navbar.css";
 import { FaPhoneAlt } from "react-icons/fa";
 import logo from "../../assets/logo.png";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { getAuthToken } from "../../utils/auth";
+import { AUTH_STATE_EVENT, getAuthToken } from "../../utils/auth";
 
 function Navbar() {
-  const isAuthed = Boolean(getAuthToken());
+  const [isAuthed, setIsAuthed] = useState(Boolean(getAuthToken()));
+
+  useEffect(() => {
+    const syncAuthState = () => {
+      setIsAuthed(Boolean(getAuthToken()));
+    };
+
+    window.addEventListener(AUTH_STATE_EVENT, syncAuthState);
+    window.addEventListener("storage", syncAuthState);
+
+    return () => {
+      window.removeEventListener(AUTH_STATE_EVENT, syncAuthState);
+      window.removeEventListener("storage", syncAuthState);
+    };
+  }, []);
 
   return (
     <header className="topbar">
@@ -15,13 +29,10 @@ function Navbar() {
 
         <nav className="menu">
           <NavLink to="/">Home</NavLink>
-          <NavLink to="/about">About</NavLink>
-          <NavLink to="/category">Bus</NavLink>
           <NavLink to="/bus-service">Services</NavLink>
-          <NavLink to="/my-profile">My Profile</NavLink>
-          {!isAuthed ? <NavLink to="/login">Login</NavLink> : null}
-          {!isAuthed ? <NavLink to="/register">Register</NavLink> : null}
-          {isAuthed ? <NavLink to="/logout">Logout</NavLink> : null}
+          <NavLink to={isAuthed ? "/my-profile" : "/login"}>
+            {isAuthed ? "My Profile" : "Sign In"}
+          </NavLink>
         </nav>
 
         <div className="topbar-actions">

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import "../css/auth.css";
 import api from "../../services/api";
 import { setAuth } from "../../utils/auth";
+import { sanitizeText, validateLoginForm } from "../../utils/validation";
 
 function Login() {
   const navigate = useNavigate();
@@ -15,12 +16,17 @@ function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (loading) return;
+    const validationMessage = validateLoginForm({ email, password });
+    if (validationMessage) {
+      setError(validationMessage);
+      return;
+    }
     setError("");
     setLoading(true);
 
     try {
       const response = await api.post("/api/auth/login", {
-        email: email.trim(),
+        email: sanitizeText(email).toLowerCase(),
         password
       });
       const token = response?.data?.token;
@@ -40,7 +46,6 @@ function Login() {
       setLoading(false);
     }
   };
-
   return (
     <section className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
@@ -50,6 +55,7 @@ function Login() {
           placeholder="Email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
+          maxLength={100}
           required
         />
         <input
@@ -57,6 +63,8 @@ function Login() {
           placeholder="Password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
+          minLength={6}
+          maxLength={128}
           required
         />
         {error ? <p className="err-msg">{error}</p> : null}

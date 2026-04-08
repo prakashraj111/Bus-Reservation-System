@@ -3,12 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import "../css/auth.css";
 import api from "../../services/api";
 import { setAuth } from "../../utils/auth";
+import { sanitizeText, validateRegisterForm } from "../../utils/validation";
 
 function Register() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,13 +16,18 @@ function Register() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (loading) return;
+    const validationMessage = validateRegisterForm({ username, email, password });
+    if (validationMessage) {
+      setError(validationMessage);
+      return;
+    }
     setError("");
     setLoading(true);
 
     try {
       const response = await api.post("/api/auth/register", {
-        username: username.trim(),
-        email: email.trim(),
+        username: sanitizeText(username),
+        email: sanitizeText(email).toLowerCase(),
         password
       });
       const token = response?.data?.token;
@@ -50,6 +55,7 @@ function Register() {
           placeholder="Full name"
           value={username}
           onChange={(event) => setUsername(event.target.value)}
+          maxLength={60}
           required
         />
         <input
@@ -57,18 +63,16 @@ function Register() {
           placeholder="Email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
+          maxLength={100}
           required
-        />
-        <input
-          placeholder="Phone"
-          value={phone}
-          onChange={(event) => setPhone(event.target.value)}
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
+          minLength={6}
+          maxLength={128}
           required
         />
         {error ? <p className="err-msg">{error}</p> : null}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import "../css/busService.css";
+import { sanitizeText, validateSearchForm } from "../../utils/validation";
 
 const today = new Date().toISOString().slice(0, 10);
 
@@ -137,7 +138,17 @@ function BusService() {
       return;
     }
 
-    searchTrips(formData);
+    const validationMessage = validateSearchForm(formData);
+    if (validationMessage) {
+      setStatus({ type: "error", message: validationMessage });
+      return;
+    }
+
+    searchTrips({
+      from: sanitizeText(formData.from),
+      to: sanitizeText(formData.to),
+      travelDate: formData.travelDate
+    });
   };
 
   const formatTime = (value) => {
@@ -194,6 +205,7 @@ function BusService() {
               onChange={handleChange}
               onFocus={() => setActiveSuggestionField("from")}
               autoComplete="off"
+              maxLength={50}
             />
             {activeSuggestionField === "from" && suggestions.from.length ? (
               <div className="bus-suggestions">
@@ -220,6 +232,7 @@ function BusService() {
               onChange={handleChange}
               onFocus={() => setActiveSuggestionField("to")}
               autoComplete="off"
+              maxLength={50}
             />
             {activeSuggestionField === "to" && suggestions.to.length ? (
               <div className="bus-suggestions">
@@ -242,6 +255,7 @@ function BusService() {
             name="travelDate"
             value={formData.travelDate}
             onChange={handleChange}
+            min={today}
           />
 
           <button type="submit" disabled={isLoading}>
@@ -295,7 +309,7 @@ function BusService() {
 
                 <div className="bus-seat-box">
                   <p>Available Seats</p>
-                  <strong>{trip.availableSeats ?? 0}</strong>
+                  <strong>{trip.availableSeatCount ?? trip.availableSeats ?? 0}</strong>
                   <span>Rs. {trip.seatPrice ?? 0}</span>
                 </div>
               </div>
@@ -306,7 +320,7 @@ function BusService() {
                   className="bus-inline-btn"
                   onClick={() =>
                     navigate("/view-my-bus", {
-                      state: { busId: bus._id }
+                      state: { busId: bus._id, trip: { ...trip, bus, route } }
                     })
                   }
                   disabled={!bus._id}
@@ -318,7 +332,7 @@ function BusService() {
                     className="bus-inline-btn"
                     onClick={() =>
                       navigate("/bus-route", {
-                        state: { busId: bus._id }
+                        state: { busId: bus._id, trip: { ...trip, bus, route } }
                       })
                     }
                     disabled={!bus._id}

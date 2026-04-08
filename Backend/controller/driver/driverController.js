@@ -3,10 +3,11 @@ const fs = require("fs");
 const catchAsync = require("../../utils/catchAsync");
 const User = require("../../models/userModel");
 const Review = require("../../models/reviewModel");
+const { validateBusPayload, isValidObjectId } = require("../../utils/validation");
 
 const canManageBus = (bus, user) => {
   if (!bus || !user) return false;
-  if (user.role ===  "driver" || "admin") return true;
+  if (user.role === "admin") return true;
   return bus.driverId && bus.driverId.toString() === user.id;
 };
 
@@ -20,8 +21,17 @@ exports.getMyBuses = catchAsync(async (req, res, next) => {
 
 exports.getOnePost = catchAsync(async (req, res) => {
   const { id } = req.params;
+  if (!isValidObjectId(id)) {
+    return res.status(400).json({ success: false, message: "Invalid bus ID" });
+  }
   const post = await Bus.findById(id)
-               .populate("reviews");
+               .populate({
+                 path: "reviews",
+                 populate: {
+                   path: "userId",
+                   select: "username email"
+                 }
+               });
 
   if (!post) {
     return res.status(404).json({
@@ -38,21 +48,12 @@ exports.getOnePost = catchAsync(async (req, res) => {
 });
 
 exports.createBusPost = catchAsync(async (req, res) => {
-  const {
-    busName,
-    description,
-    operator,
-    busNumberPlate,
-    type,
-    totalSeats
-  } = req.body;
-
-  if (!busName || !description || !operator || !busNumberPlate || !type || !totalSeats) {
-    return res.status(400).json({
-      success: false,
-      message: "Some fields are missing"
-    });
+  const validation = validateBusPayload(req.body);
+  if (validation.error) {
+    return res.status(400).json({ success: false, message: validation.error });
   }
+
+  const sanitizedPayload = validation.value;
 
   const filePath = req.file
     ? req.file.filename
@@ -67,12 +68,12 @@ exports.createBusPost = catchAsync(async (req, res) => {
     }
 
   const postCreated = await Bus.create({
-    busName,
-    description,
-    operator,
-    busNumberPlate,
-    type,
-    totalSeats,
+    busName: sanitizedPayload.busName,
+    description: sanitizedPayload.description,
+    operator: sanitizedPayload.operator,
+    busNumberPlate: sanitizedPayload.busNumberPlate,
+    type: sanitizedPayload.type,
+    totalSeats: sanitizedPayload.totalSeats,
     imageUrl: filePath,
     driverId: req.user.id
   });
@@ -87,10 +88,10 @@ exports.createBusPost = catchAsync(async (req, res) => {
 exports.deletePost = catchAsync(async (req, res) => {
   const { id } = req.params;
 
-  if (!id) {
+  if (!id || !isValidObjectId(id)) {
     return res.status(400).json({
       success: false,
-      message: "Please provide id"
+      message: "Please provide a valid bus ID"
     });
   }
 
@@ -132,10 +133,10 @@ exports.deletePost = catchAsync(async (req, res) => {
 
 exports.updateBusPost = catchAsync(async (req, res) => {
   const { id } = req.params;
-  if (!id) {
+  if (!id || !isValidObjectId(id)) {
     return res.status(400).json({
       success: false,
-      message: "Please provide id"
+      message: "Please provide a valid bus ID"
     });
   }
 
@@ -164,18 +165,27 @@ exports.updateBusPost = catchAsync(async (req, res) => {
     filePath = req.file.filename;
   }
 
+  const mergedPayload = {
+    busName: req.body.busName ?? oldData.busName,
+    description: req.body.description ?? oldData.description,
+    operator: req.body.operator ?? oldData.operator,
+    busNumberPlate: req.body.busNumberPlate ?? oldData.busNumberPlate,
+    type: req.body.type ?? oldData.type,
+    totalSeats: req.body.totalSeats ?? oldData.totalSeats
+  };
+
+  const validation = validateBusPayload(mergedPayload);
+  if (validation.error) {
+    return res.status(400).json({ success: false, message: validation.error });
+  }
+
   const payload = {
-    busName: req.body.busName || oldData.busName,
-    description: req.body.description || oldData.description,
-    operator: req.body.operator || oldData.operator,
-    busNumberPlate: req.body.busNumberPlate || oldData.busNumberPlate,
-    type: req.body.type || oldData.type,
-    totalSeats: req.body.totalSeats || oldData.totalSeats,
+    ...validation.value,
     imageUrl: filePath
   };
 
   const updatedBus = await Bus.findByIdAndUpdate(id, payload, {
-    new: true,
+    returnDocument: "after",
     runValidators: true
   });
 
@@ -185,5 +195,3 @@ exports.updateBusPost = catchAsync(async (req, res) => {
     data: updatedBus
   });
 });
-
-

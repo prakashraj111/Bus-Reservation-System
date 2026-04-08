@@ -2,7 +2,6 @@ import React from "react";
 import "../css/home.css";
 import heroBg from "../../assets/bg1.jpg";
 import heroBus from "../../assets/bus3.png";
-import BusCategory from "./BusCategory";
 import OfferCard from "./OfferCard";
 
 function Home() {
@@ -39,7 +38,7 @@ function Home() {
         </div>
       </section>
 
-    <section className="home-search-shell">
+    {/* <section className="home-search-shell">
         <div className="home-search-card">
           <label className="home-field">
             <span>From</span>
@@ -60,8 +59,8 @@ function Home() {
             <button type="button">Find Bus</button>
           </div>
         </div>
-      </section>
-      <BusCategory />
+      </section> */}
+      {/* <BusCategory /> */}
       <OfferCard />
     </main>
   );

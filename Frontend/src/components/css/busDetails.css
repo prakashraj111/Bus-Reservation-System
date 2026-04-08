@@ -1,89 +1,510 @@
-.bus-container{
-  display: flex;
-  gap: 40px;
-  padding: 40px;
-  align-items: flex-start;
+.bus-details-page {
+  min-height: 100vh;
+  padding: 32px 0 56px;
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.08), transparent 24%),
+    radial-gradient(circle at right bottom, rgba(245, 158, 11, 0.08), transparent 20%),
+    #f8fafc;
 }
 
-/* LEFT SIDE */
-
-.bus-left{
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.bus-container {
+  width: min(1120px, 94%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 380px minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
 }
 
-.bus-image{
-  width: 350px;
-  height: 300px;
-  border: 2px solid black;
-  border-radius: 20px;
+.bus-left,
+.bus-heading-card,
+.bus-summary-card,
+.bus-operator-card {
+  border-radius: 24px;
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+}
+
+.bus-left {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.bus-image-shell {
+  padding: 14px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(219, 234, 254, 0.92) 0%, rgba(255, 255, 255, 0.98) 100%);
+  border: 1px solid rgba(191, 219, 254, 0.8);
+  box-shadow: 0 18px 36px rgba(29, 78, 216, 0.08);
+}
+
+.bus-image {
+  height: 320px;
+  border-radius: 22px;
   overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(239, 246, 255, 0.92) 0%, rgba(255, 255, 255, 0.98) 100%);
+  display: grid;
+  place-items: center;
 }
 
-.bus-image img{
+.bus-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  padding: 16px;
 }
 
-.bus-extra{
-  width: 350px;
-  height: 50px;
-  border: 2px solid black;
-  border-radius: 10px;
+.bus-operator-card {
+  padding: 18px 20px;
+  display: grid;
+  gap: 8px;
 }
 
-.bus-buttons{
-  display: flex;
-  gap: 20px;
+.bus-section-label {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
 }
 
-.bus-buttons button{
-  padding: 10px 20px;
-  border: 2px solid black;
-  border-radius: 10px;
-  background: white;
+.bus-operator-card strong,
+.bus-summary-card strong {
+  color: #0f172a;
+  font-size: 1.1rem;
+}
+
+.bus-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.bus-action-btn {
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-weight: 700;
   cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
-/* RIGHT SIDE */
+.bus-action-btn:hover {
+  transform: translateY(-1px);
+}
 
-.bus-right{
-  width: 450px;
-  display: flex;
-  flex-direction: column;
+.bus-action-btn.primary {
+  background: #0f172a;
+  color: #fff;
+  box-shadow: 0 14px 24px rgba(15, 23, 42, 0.16);
+}
+
+.bus-action-btn.secondary {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.bus-action-btn.danger {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #be123c;
+}
+
+.bus-right {
+  display: grid;
+  gap: 18px;
+}
+
+.bus-review-shell {
+  width: min(1120px, 94%);
+  margin: 28px auto 0;
+  display: grid;
   gap: 20px;
 }
 
-.bus-title{
-  border: 2px solid black;
-  border-radius: 10px;
-  padding: 10px;
+.bus-review-head,
+.bus-review-summary-card,
+.bus-review-list-card,
+.bus-review-form-card,
+.bus-review-status {
+  border-radius: 24px;
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
 }
 
-.bus-description{
-  border: 2px solid black;
+.bus-review-head {
+  padding: 24px 28px;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+}
+
+.bus-review-head h2,
+.bus-review-list-head h3,
+.bus-review-form-card h3 {
+  margin: 10px 0 8px;
+  color: #0f172a;
+}
+
+.bus-review-subtitle,
+.bus-review-form-copy {
+  margin: 0;
+  color: #475569;
+  line-height: 1.7;
+}
+
+.bus-review-summary-card {
+  min-width: 160px;
+  padding: 20px 22px;
+  display: grid;
+  gap: 6px;
+  text-align: right;
+}
+
+.bus-review-summary-card strong {
+  font-size: 2rem;
+  color: #0f172a;
+}
+
+.bus-review-summary-card span:last-child {
+  color: #64748b;
+}
+
+.bus-review-status {
+  padding: 16px 18px;
+  font-weight: 600;
+}
+
+.bus-review-status.success {
+  color: #166534;
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.bus-review-status.error {
+  color: #b91c1c;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.bus-review-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.9fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.bus-review-list-card,
+.bus-review-form-card {
+  padding: 24px;
+}
+
+.bus-review-list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.bus-review-list-head span {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.bus-review-list {
+  display: grid;
+  gap: 14px;
+}
+
+.bus-review-card {
   border-radius: 20px;
-  padding: 20px;
-  height: 120px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  padding: 18px;
+  display: grid;
+  gap: 14px;
 }
 
-.bus-seats{
-  border: 2px solid black;
-  border-radius: 10px;
-  padding: 10px;
-}
-
-.bus-info-row{
+.bus-review-card-top {
   display: flex;
-  gap: 20px;
+  align-items: flex-start;
+  gap: 14px;
 }
 
-.bus-type,
-.bus-number{
-  border: 2px solid black;
-  border-radius: 15px;
-  padding: 15px;
-  flex: 1;
+.bus-review-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.bus-review-meta {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bus-review-meta strong {
+  color: #0f172a;
+}
+
+.bus-review-stars {
+  display: flex;
+  gap: 3px;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+.bus-review-stars .filled {
+  color: #f59e0b;
+}
+
+.bus-review-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bus-review-actions button,
+.bus-review-page-btn,
+.bus-review-submit-btn,
+.bus-review-cancel-btn {
+  min-height: 42px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  padding: 0 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.bus-review-actions button:hover,
+.bus-review-page-btn:hover,
+.bus-review-submit-btn:hover,
+.bus-review-cancel-btn:hover {
+  transform: translateY(-1px);
+}
+
+.bus-review-actions button {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.bus-review-actions button.danger {
+  background: #fff1f2;
+  color: #be123c;
+  border-color: #fecdd3;
+}
+
+.bus-review-card p,
+.bus-review-empty {
+  margin: 0;
+  color: #475569;
+  line-height: 1.8;
+}
+
+.bus-review-empty {
+  padding: 18px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px dashed rgba(148, 163, 184, 0.32);
+}
+
+.bus-review-pagination {
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bus-review-page-btn {
+  background: #fff;
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #0f172a;
+}
+
+.bus-review-page-btn:disabled,
+.bus-review-submit-btn:disabled,
+.bus-review-cancel-btn:disabled,
+.bus-review-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.bus-review-form {
+  margin-top: 18px;
+  display: grid;
+  gap: 16px;
+}
+
+.bus-review-form-field {
+  display: grid;
+  gap: 8px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.bus-review-form-field select,
+.bus-review-form-field textarea {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  padding: 14px 16px;
+  background: #f8fafc;
+  color: #0f172a;
+  font: inherit;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.bus-review-form-field select:focus,
+.bus-review-form-field textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.16);
+  background: #fff;
+}
+
+.bus-review-form-field textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.bus-review-form-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bus-review-submit-btn {
+  background: #0f172a;
+  color: #fff;
+  box-shadow: 0 14px 24px rgba(15, 23, 42, 0.16);
+}
+
+.bus-review-cancel-btn {
+  background: #fff;
+  color: #334155;
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.bus-heading-card {
+  padding: 28px;
+}
+
+.bus-heading-card h1 {
+  margin: 10px 0 14px;
+  color: #0f172a;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1.08;
+}
+
+.bus-description {
+  margin: 0;
+  color: #475569;
+  line-height: 1.75;
+  font-size: 1rem;
+}
+
+.bus-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.bus-summary-card {
+  padding: 20px 22px;
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 960px) {
+  .bus-container {
+    grid-template-columns: 1fr;
+  }
+
+  .bus-review-head,
+  .bus-review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bus-review-head {
+    align-items: flex-start;
+  }
+
+  .bus-review-summary-card {
+    width: 100%;
+    text-align: left;
+  }
+
+  .bus-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .bus-details-page {
+    padding-top: 24px;
+  }
+
+  .bus-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .bus-heading-card {
+    padding: 22px;
+  }
+
+  .bus-review-head,
+  .bus-review-list-card,
+  .bus-review-form-card {
+    padding: 20px;
+  }
+
+  .bus-review-list-head,
+  .bus-review-card-top,
+  .bus-review-pagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bus-review-actions,
+  .bus-review-form-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .bus-review-actions button,
+  .bus-review-page-btn,
+  .bus-review-submit-btn,
+  .bus-review-cancel-btn {
+    width: 100%;
+  }
+
+  .bus-image {
+    height: 260px;
+  }
 }

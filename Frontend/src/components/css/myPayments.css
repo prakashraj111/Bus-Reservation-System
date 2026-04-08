@@ -1,0 +1,158 @@
+.my-payments-page {
+  min-height: 100vh;
+  padding: 32px 0 56px;
+  background: #f8fafc;
+}
+
+.my-payments-shell {
+  width: min(1100px, 94%);
+  margin: 0 auto;
+  display: grid;
+  gap: 20px;
+}
+
+.my-payments-header,
+.my-payments-status,
+.my-payment-card,
+.my-payments-empty {
+  border-radius: 24px;
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+}
+
+.my-payments-header {
+  padding: 24px 28px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.my-payments-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.my-payments-header h1 {
+  margin: 10px 0 8px;
+  color: #0f172a;
+}
+
+.my-payments-header p:last-child {
+  color: #64748b;
+}
+
+.my-payments-back {
+  text-decoration: none;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 700;
+}
+
+.my-payments-status,
+.my-payments-empty {
+  padding: 16px;
+  color: #64748b;
+}
+
+.my-payments-status.error {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.my-payments-list {
+  display: grid;
+  gap: 16px;
+}
+
+.my-payment-card {
+  padding: 22px;
+  display: grid;
+  gap: 16px;
+}
+
+.my-payment-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.transaction-code {
+  color: #1d4ed8;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.my-payment-card h3 {
+  margin: 6px 0;
+  color: #0f172a;
+}
+
+.payment-badge,
+.my-payment-meta span,
+.my-payment-actions a,
+.pending-note {
+  padding: 8px 12px;
+  border-radius: 999px;
+}
+
+.payment-badge {
+  text-transform: capitalize;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.payment-badge.paid {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.payment-badge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.payment-badge.failed {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.my-payment-meta,
+.my-payment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.my-payment-meta span {
+  background: #eff6ff;
+  color: #334155;
+}
+
+.my-payment-actions a {
+  text-decoration: none;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.pending-note {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+@media (max-width: 720px) {
+  .my-payments-header,
+  .my-payment-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

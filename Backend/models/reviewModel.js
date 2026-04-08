@@ -5,11 +5,16 @@ const reviewSchema = new Schema({
     userId : {type : Schema.Types.ObjectId, ref : "User"},
     comment: {
         type: String,
-        required: true
+        required: true,
+        trim: true,
+        minlength: 5,
+        maxlength: 500
     },
     rating: {
         type: Number,
-        required: true
+        required: true,
+        min: 1,
+        max: 5
     }
 })
 

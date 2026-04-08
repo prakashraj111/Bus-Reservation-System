@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../css/addBusRoute.css";
 import api from "../../services/api";
+import { sanitizeText, validateRouteForm } from "../../utils/validation";
+import { useNotification } from "../notifications/NotificationProvider";
 
 function UpdateBusRoute() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { showError, showSuccess } = useNotification();
   const locationRoute = location.state?.route || null;
   const routeId = location.state?.routeId || locationRoute?._id || "";
   const busId = location.state?.busId || locationRoute?.busId || "";
@@ -65,7 +68,9 @@ function UpdateBusRoute() {
 
     const fetchRoute = async () => {
       if (!routeId) {
-        setStatus({ type: "error", message: "Route ID is required" });
+        const message = "Route ID is required";
+        setStatus({ type: "error", message });
+        showError(message);
         return;
       }
 
@@ -83,6 +88,7 @@ function UpdateBusRoute() {
           "Failed to load route";
         if (isMounted) {
           setStatus({ type: "error", message });
+          showError(message);
         }
       }
     };
@@ -141,7 +147,19 @@ function UpdateBusRoute() {
     e.preventDefault();
 
     if (!routeId) {
-      setStatus({ type: "error", message: "Route ID is required" });
+      const message = "Route ID is required";
+      setStatus({ type: "error", message });
+      showError(message);
+      return;
+    }
+
+    const validationMessage = validateRouteForm({
+      ...formData,
+      stops
+    });
+    if (validationMessage) {
+      setStatus({ type: "error", message: validationMessage });
+      showError(validationMessage);
       return;
     }
 
@@ -149,13 +167,29 @@ function UpdateBusRoute() {
     setStatus({ type: "", message: "" });
 
     const routeData = {
-      ...formData,
-      stops
+      from: {
+        stopName: sanitizeText(formData.from.stopName),
+        departureTime: formData.from.departureTime
+      },
+      to: {
+        stopName: sanitizeText(formData.to.stopName),
+        arrivalTime: formData.to.arrivalTime
+      },
+      distanceKm: Number(formData.distanceKm) || 0,
+      estimatedDurationMin: Number(formData.estimatedDurationMin),
+      stops: stops
+        .map((stop) => ({
+          stopName: sanitizeText(stop.stopName),
+          arrivalTime: stop.arrivalTime,
+          departureTime: stop.departureTime
+        }))
+        .filter((stop) => stop.stopName)
     };
 
     try {
       const response = await api.put(`/api/bus/route/${routeId}`, routeData);
       const updatedRoute = response.data?.data || null;
+      showSuccess(response.data?.message || "Route updated successfully");
       navigate("/bus-route", {
         state: {
           busId,
@@ -168,6 +202,7 @@ function UpdateBusRoute() {
         error?.message ||
         "Failed to update route";
       setStatus({ type: "error", message });
+      showError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -197,6 +232,7 @@ function UpdateBusRoute() {
             name="stopName"
             value={formData.from.stopName}
             onChange={(e) => handleChange(e, "from")}
+            maxLength={60}
             required
           />
         </div>
@@ -209,6 +245,7 @@ function UpdateBusRoute() {
             name="departureTime"
             value={formData.from.departureTime}
             onChange={(e) => handleChange(e, "from")}
+            required
           />
         </div>
 
@@ -223,6 +260,7 @@ function UpdateBusRoute() {
             name="stopName"
             value={formData.to.stopName}
             onChange={(e) => handleChange(e, "to")}
+            maxLength={60}
             required
           />
         </div>
@@ -234,6 +272,7 @@ function UpdateBusRoute() {
             name="arrivalTime"
             value={formData.to.arrivalTime}
             onChange={(e) => handleChange(e, "to")}
+            required
           />
         </div>
 
@@ -249,6 +288,8 @@ function UpdateBusRoute() {
             name="distanceKm"
             value={formData.distanceKm}
             onChange={handleMainChange}
+            min="0"
+            step="0.1"
           />
         </div>
 
@@ -259,6 +300,9 @@ function UpdateBusRoute() {
             name="estimatedDurationMin"
             value={formData.estimatedDurationMin}
             onChange={handleMainChange}
+            min="1"
+            step="1"
+            required
           />
         </div>
 
@@ -275,6 +319,7 @@ function UpdateBusRoute() {
               placeholder="Stop Name"
               value={stop.stopName}
               onChange={(e) => handleStopChange(index, e)}
+              maxLength={60}
             />
 
             <input

@@ -2,10 +2,13 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../css/tripForm.css";
 import api from "../../services/api";
+import { validateTripForm } from "../../utils/validation";
+import { useNotification } from "../notifications/NotificationProvider";
 
 function TripForm() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { showError, showSuccess } = useNotification();
   const busId = location.state?.busId || "";
   const routeId = location.state?.routeId || "";
   const tripId = location.state?.tripId || "";
@@ -38,7 +41,16 @@ function TripForm() {
     e.preventDefault();
 
     if (!isEditMode && (!busId || !routeId)) {
-      setStatus({ type: "error", message: "Bus ID and Route ID are required" });
+      const message = "Bus ID and Route ID are required";
+      setStatus({ type: "error", message });
+      showError(message);
+      return;
+    }
+
+    const validationMessage = validateTripForm(formData);
+    if (validationMessage) {
+      setStatus({ type: "error", message: validationMessage });
+      showError(validationMessage);
       return;
     }
 
@@ -67,6 +79,10 @@ function TripForm() {
           response.data?.message ||
           (isEditMode ? "Trip updated successfully" : "Trip created successfully")
       });
+      showSuccess(
+        response.data?.message ||
+          (isEditMode ? "Trip updated successfully" : "Trip created successfully")
+      );
       navigate(isEditMode ? "/my-scheduled-bus" : "/bus-route", {
         state: isEditMode ? undefined : { busId }
       });
@@ -76,6 +92,7 @@ function TripForm() {
         error?.message ||
         (isEditMode ? "Failed to update trip" : "Failed to create trip");
       setStatus({ type: "error", message });
+      showError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -101,6 +118,7 @@ function TripForm() {
             name="travelDate"
             value={formData.travelDate}
             onChange={handleChange}
+            min={new Date().toISOString().slice(0, 10)}
             required
           />
         </div>
@@ -134,6 +152,9 @@ function TripForm() {
             name="seatPrice"
             value={formData.seatPrice}
             onChange={handleChange}
+            min="1"
+            step="1"
+            required
           />
         </div>
 
@@ -144,6 +165,9 @@ function TripForm() {
             name="totalSeats"
             value={formData.totalSeats}
             onChange={handleChange}
+            min="40"
+            max="60"
+            step="1"
             required
           />
         </div>

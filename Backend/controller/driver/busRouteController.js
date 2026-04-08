@@ -1,34 +1,28 @@
 
 const Route = require("../../models/busRoutemodel");
+const Bus = require("../../models/busModel");
 const catchAsync = require("../../utils/catchAsync");
+const { validateRoutePayload, isValidObjectId } = require("../../utils/validation");
 
 
 // =======================================
 // ✅ CREATE ROUTE
 // =======================================
 exports.createRoute = catchAsync(async (req, res, next) => {
-
-  const {
-    busId,
-    from,
-    to,
-    distanceKm,
-    estimatedDurationMin,
-    stops
-  } = req.body;
-
-  if (!busId) {
-    return res.status(400).json({
-      success: false,
-      message: "Bus ID is required"
-    });
+  const validation = validateRoutePayload(req.body);
+  if (validation.error) {
+    return res.status(400).json({ success: false, message: validation.error });
   }
 
-  if (!from || !to) {
-    return res.status(400).json({
-      success: false,
-      message: "From and To locations are required"
-    });
+  const { busId, from, to, distanceKm, estimatedDurationMin, stops } = validation.value;
+  const bus = await Bus.findById(busId);
+
+  if (!bus) {
+    return res.status(404).json({ success: false, message: "Bus not found" });
+  }
+
+  if (req.user.role !== "admin" && bus.driverId?.toString() !== req.user.id) {
+    return res.status(403).json({ success: false, message: "You do not have permission to manage this bus route" });
   }
 
   const newRoute = await Route.create({
@@ -67,6 +61,9 @@ exports.createRoute = catchAsync(async (req, res, next) => {
 // ✅ GET SINGLE ROUTE
 // =======================================
 exports.getSingleRoute = catchAsync(async (req, res, next) => {
+  if (!isValidObjectId(req.params.id)) {
+    return res.status(400).json({ success: false, message: "Invalid route ID" });
+  }
 
   const route = await Route.findById(req.params.id);
 
@@ -88,6 +85,9 @@ exports.getSingleRoute = catchAsync(async (req, res, next) => {
 // =======================================
 exports.getRouteByBusId = catchAsync(async (req, res, next) => {
   const { busId } = req.params;
+  if (!isValidObjectId(busId)) {
+    return res.status(400).json({ success: false, message: "Invalid bus ID" });
+  }
 
   const route = await Route.findOne({ busId });
 
@@ -109,6 +109,9 @@ exports.getRouteByBusId = catchAsync(async (req, res, next) => {
 // ✅ UPDATE ROUTE
 // =======================================
 exports.updateRoute = catchAsync(async (req, res, next) => {
+  if (!isValidObjectId(req.params.id)) {
+    return res.status(400).json({ success: false, message: "Invalid route ID" });
+  }
 
   const route = await Route.findById(req.params.id);
 
@@ -119,11 +122,35 @@ exports.updateRoute = catchAsync(async (req, res, next) => {
     });
   }
 
+  const bus = await Bus.findById(route.busId);
+  if (!bus) {
+    return res.status(404).json({ success: false, message: "Bus not found" });
+  }
+  if (req.user.role !== "admin" && bus.driverId?.toString() !== req.user.id) {
+    return res.status(403).json({ success: false, message: "You do not have permission to update this route" });
+  }
+
+  const validation = validateRoutePayload(
+    {
+      busId: route.busId?.toString(),
+      from: req.body.from ?? route.from,
+      to: req.body.to ?? route.to,
+      distanceKm: req.body.distanceKm ?? route.distanceKm,
+      estimatedDurationMin: req.body.estimatedDurationMin ?? route.estimatedDurationMin,
+      stops: req.body.stops ?? route.stops
+    },
+    { requireBusId: true }
+  );
+
+  if (validation.error) {
+    return res.status(400).json({ success: false, message: validation.error });
+  }
+
   const updatedRoute = await Route.findByIdAndUpdate(
     req.params.id,
-    req.body,
+    validation.value,
     {
-      new: true,
+      returnDocument: "after",
       runValidators: true
     }
   );
@@ -140,6 +167,9 @@ exports.updateRoute = catchAsync(async (req, res, next) => {
 // ✅ DELETE ROUTE
 // =======================================
 exports.deleteRoute = catchAsync(async (req, res, next) => {
+  if (!isValidObjectId(req.params.id)) {
+    return res.status(400).json({ success: false, message: "Invalid route ID" });
+  }
 
   const route = await Route.findById(req.params.id);
 
@@ -148,6 +178,14 @@ exports.deleteRoute = catchAsync(async (req, res, next) => {
       success: false,
       message: "Route not found"
     });
+  }
+
+  const bus = await Bus.findById(route.busId);
+  if (!bus) {
+    return res.status(404).json({ success: false, message: "Bus not found" });
+  }
+  if (req.user.role !== "admin" && bus.driverId?.toString() !== req.user.id) {
+    return res.status(403).json({ success: false, message: "You do not have permission to delete this route" });
   }
 
   await Route.findByIdAndDelete(req.params.id);

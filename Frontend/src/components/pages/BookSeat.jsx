@@ -63,10 +63,8 @@ function BookSeat() {
   const location = useLocation();
   const { tripId: routeTripId } = useParams();
   const [searchParams] = useSearchParams();
-
   const stateTrip = location.state?.trip || null;
   const resolvedTripId = routeTripId || stateTrip?._id || searchParams.get("tripId") || "";
-
   const [trip, setTrip] = useState(stateTrip);
   const [seatState, setSeatState] = useState({
     totalSeats: stateTrip?.totalSeats || 40,
@@ -82,7 +80,6 @@ function BookSeat() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
-
   const totalSeats = trip?.totalSeats === 60 ? 60 : 40;
   const seatRows = useMemo(() => createSeatRows(totalSeats), [totalSeats]);
   const selectedSeatLabels = selectedSeats.map(getSeatLabel);
@@ -90,7 +87,6 @@ function BookSeat() {
   const holdCountdown = activeBooking?.expiresAt
     ? Math.max(new Date(activeBooking.expiresAt).getTime() - currentTime, 0)
     : 0;
-
   useEffect(() => {
     if (!resolvedTripId) {
       setIsLoading(false);
@@ -138,7 +134,6 @@ function BookSeat() {
       isMounted = false;
     };
   }, [resolvedTripId]);
-
   useEffect(() => {
     if (!resolvedTripId) return undefined;
 
@@ -164,7 +159,6 @@ function BookSeat() {
       socket.disconnect();
     };
   }, [resolvedTripId]);
-
   useEffect(() => {
     if (!activeBooking?.expiresAt) return undefined;
 
@@ -243,16 +237,16 @@ function BookSeat() {
         totalAmount: totalFare
       });
 
-      const booking = bookingResponse.data?.data;
+      const seatLock = bookingResponse.data?.data;
       const lockExpiresAt = bookingResponse.data?.seatLock?.expiresAt;
 
       setActiveBooking({
-        bookingId: booking?._id,
+        bookingId: seatLock?._id,
         expiresAt: lockExpiresAt
       });
       setSeatState((current) => bookingResponse.data?.seatLock?.seats || current);
 
-      navigate(`/booking/${booking?._id}/details`, {
+      navigate(`/seat-lock/${seatLock?._id}/details`, {
         state: { trip: trip || stateTrip }
       });
     } catch (error) {

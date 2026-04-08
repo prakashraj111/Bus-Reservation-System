@@ -60,47 +60,12 @@ function BookingTickets() {
   useEffect(() => {
     const paymentId = searchParams.get("paymentId");
     const paymentStatus = searchParams.get("payment");
+    if (!paymentId || !paymentStatus) return;
 
-    if (!bookingId || !paymentId || !paymentStatus) return;
-
-    const verificationKey = `${bookingId}:${paymentId}:${paymentStatus}:${searchParams.get("data") || ""}`;
-    if (verificationRef.current === verificationKey) return;
-    verificationRef.current = verificationKey;
-
-    const verifyPayment = async () => {
-      setStatus({ type: "", message: "" });
-      setIsLoading(true);
-
-      try {
-        const response = await api.post(
-          `/api/book/${bookingId}/pay/${paymentId}/verify`,
-          { data: searchParams.get("data") || "" },
-          { params: { payment: paymentStatus } }
-        );
-
-        setStatus({
-          type: response.data?.success ? "success" : "error",
-          message: response.data?.message || "Payment verification completed"
-        });
-      } catch (error) {
-        setStatus({
-          type: "error",
-          message:
-            error?.response?.data?.message ||
-            error?.message ||
-            "Unable to verify payment"
-        });
-      } finally {
-        await api
-          .get(`/api/booking/${bookingId}/tickets`)
-          .then((response) => setPayload(response.data?.data))
-          .catch(() => {});
-        setIsLoading(false);
-        navigate(`/booking/${bookingId}/tickets`, { replace: true });
-      }
-    };
-
-    verifyPayment();
+    const key = `${bookingId}:${paymentId}:${paymentStatus}`;
+    if (verificationRef.current === key) return;
+    verificationRef.current = key;
+    navigate(`/booking/${bookingId}/tickets`, { replace: true });
   }, [bookingId, navigate, searchParams]);
 
   const handleDownload = async () => {
@@ -138,13 +103,16 @@ function BookingTickets() {
   const trip = booking?.tripId;
   const firstTicket = tickets[0];
   const snapshot = firstTicket?.snapshot || {};
+  const liveBus = trip?.busId || {};
+  const liveRoute = trip?.routeId || {};
   const summary = {
-    busName: snapshot.busName || trip?.busId?.busName || "Bus Service",
-    route: `${snapshot.routeFrom || trip?.routeId?.from?.stopName || "Origin"} to ${
-      snapshot.routeTo || trip?.routeId?.to?.stopName || "Destination"
+    busName: liveBus.busName || snapshot.busName || "Bus Service",
+    route: `${liveRoute?.from?.stopName || snapshot.routeFrom || "Origin"} to ${
+      liveRoute?.to?.stopName || snapshot.routeTo || "Destination"
     }`,
-    travelDate: formatDate(snapshot.travelDate || trip?.travelDate),
-    departureTime: snapshot.departureTime || trip?.departureTime || "N/A"
+    travelDate: formatDate(trip?.travelDate || snapshot.travelDate),
+    departureTime: trip?.departureTime || snapshot.departureTime || "N/A",
+    arrivalTime: trip?.arrivalTime || snapshot.arrivalTime || "N/A"
   };
 
   return (
@@ -156,6 +124,7 @@ function BookingTickets() {
             <h1>{summary.busName}</h1>
             <p>{summary.route}</p>
             <p>{summary.travelDate} at {summary.departureTime}</p>
+            <p>Arrival: {summary.arrivalTime}</p>
           </div>
           <div className="booking-tickets-actions">
             <button
@@ -244,7 +213,7 @@ function BookingTickets() {
                       </div>
                       <div>
                         <p className="label">Fare</p>
-                        <span>Rs. {ticket.snapshot?.seatPrice || 0}</span>
+                        <span>Rs. {trip?.seatPrice ?? ticket.snapshot?.seatPrice ?? 0}</span>
                       </div>
                     </div>
                   </div>
